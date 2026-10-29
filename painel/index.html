@@ -1,0 +1,384 @@
+<title>Radar Norte Fluminense</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Familjen+Grotesk:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: cabeçalho curto, faixa de situações que também filtra, filtros numa linha,
+   lista ordenada por oportunidade. Uma coluna; no celular cada empresa vira um bloco. */
+:root {
+  --fundo: #f5f7f6;
+  --superficie: #ffffff;
+  --tinta: #13201d;
+  --fraco: #5b6b66;
+  --linha: #dbe3e0;
+  --acento: #0f5f73;
+  --acento-fundo: #e3f0f2;
+  --fora: #b8361f;   --fora-fundo: #fbe9e5;
+  --nenhum: #94590a; --nenhum-fundo: #fbf0dc;
+  --perfil: #a23272; --perfil-fundo: #f8e6ef;
+  --gratuito: #3f5c96; --gratuito-fundo: #e7ecf7;
+  --noar: #27703c;   --noar-fundo: #e2f2e6;
+  --cinza: #6a7572;  --cinza-fundo: #eceeed;
+  --fonte-titulo: "Familjen Grotesk", "Segoe UI", system-ui, sans-serif;
+  --fonte-texto: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --fonte-dado: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --raio: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fundo: #0f1716; --superficie: #16211f; --tinta: #e6eeeb; --fraco: #93a5a0;
+    --linha: #26332f; --acento: #5fc0d4; --acento-fundo: #12323a;
+    --fora: #f08a74; --fora-fundo: #3a1d17;
+    --nenhum: #eab35b; --nenhum-fundo: #33270f;
+    --perfil: #ec8cc0; --perfil-fundo: #36192a;
+    --gratuito: #98b1e6; --gratuito-fundo: #1d2741;
+    --noar: #7fd394; --noar-fundo: #16301e;
+    --cinza: #a3adaa; --cinza-fundo: #222b29;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --fundo: #0f1716; --superficie: #16211f; --tinta: #e6eeeb; --fraco: #93a5a0;
+  --linha: #26332f; --acento: #5fc0d4; --acento-fundo: #12323a;
+  --fora: #f08a74; --fora-fundo: #3a1d17;
+  --nenhum: #eab35b; --nenhum-fundo: #33270f;
+  --perfil: #ec8cc0; --perfil-fundo: #36192a;
+  --gratuito: #98b1e6; --gratuito-fundo: #1d2741;
+  --noar: #7fd394; --noar-fundo: #16301e;
+  --cinza: #a3adaa; --cinza-fundo: #222b29;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--fundo); color: var(--tinta);
+  font: 15px/1.5 var(--fonte-texto);
+  padding: 0 16px;
+}
+.pagina { max-width: 1080px; margin: 0 auto; padding-block: 28px 56px; display: grid; gap: 22px; }
+a { color: var(--acento); }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--acento); outline-offset: 2px;
+}
+
+/* cabeçalho */
+.topo { display: grid; gap: 6px; }
+.olho { font: 500 12px/1.2 var(--fonte-dado); letter-spacing: .06em; text-transform: uppercase; color: var(--fraco); }
+h1 { font: 700 clamp(28px, 5vw, 40px)/1.05 var(--fonte-titulo); letter-spacing: -.02em; margin: 0; text-wrap: balance; }
+.lead { margin: 4px 0 0; max-width: 64ch; color: var(--fraco); font-size: 16px; }
+.lead b { color: var(--tinta); }
+
+/* situações: contadores que também são o filtro principal */
+.situacoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.situacao {
+  display: grid; gap: 2px; text-align: left; cursor: pointer;
+  padding: 12px 14px; border-radius: var(--raio); border: 1px solid var(--linha);
+  background: var(--superficie); color: var(--tinta); font: inherit;
+}
+.situacao:hover { border-color: var(--fraco); }
+.situacao[aria-pressed="true"] { border-color: var(--cor); background: var(--cor-fundo); box-shadow: inset 0 0 0 1px var(--cor); }
+.situacao .rot { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--fraco); }
+.situacao[aria-pressed="true"] .rot { color: var(--tinta); }
+.situacao .num { font: 600 24px/1.1 var(--fonte-titulo); font-variant-numeric: tabular-nums; }
+.situacao .pct { font: 12px var(--fonte-dado); color: var(--fraco); }
+.ponto { width: 9px; height: 9px; border-radius: 50%; background: var(--cor); flex: none; }
+.s-todas { --cor: var(--acento); --cor-fundo: var(--acento-fundo); }
+.s-fora { --cor: var(--fora); --cor-fundo: var(--fora-fundo); }
+.s-nenhum { --cor: var(--nenhum); --cor-fundo: var(--nenhum-fundo); }
+.s-perfil { --cor: var(--perfil); --cor-fundo: var(--perfil-fundo); }
+.s-gratuito { --cor: var(--gratuito); --cor-fundo: var(--gratuito-fundo); }
+.s-noar { --cor: var(--noar); --cor-fundo: var(--noar-fundo); }
+.s-nr { --cor: var(--cinza); --cor-fundo: var(--cinza-fundo); }
+
+/* filtros */
+.filtros { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.campo { display: grid; gap: 4px; flex: 1 1 180px; min-width: 0; }
+.campo.busca { flex: 2 1 260px; }
+label, .rotulo { font-size: 12px; color: var(--fraco); letter-spacing: .02em; }
+input[type="search"], select {
+  width: 100%; padding: 9px 11px; border-radius: var(--raio); border: 1px solid var(--linha);
+  background: var(--superficie); color: var(--tinta); font: inherit; font-size: 15px;
+}
+.marcar { display: flex; align-items: center; gap: 8px; padding: 9px 2px; font-size: 14px; color: var(--tinta); cursor: pointer; flex: 0 1 auto; }
+.marcar input { width: 17px; height: 17px; accent-color: var(--acento); }
+
+.aviso { margin: 0; font-size: 13px; color: var(--fraco); max-width: 90ch; }
+.aviso b { color: var(--tinta); }
+
+/* lista */
+.topo-lista { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.topo-lista h2 { margin: 0; font: 600 18px var(--fonte-titulo); }
+.topo-lista span { font-size: 13px; color: var(--fraco); }
+.lista { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--linha); }
+.item {
+  display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 6px 18px; padding: 14px 4px; border-bottom: 1px solid var(--linha); align-items: start;
+}
+.nome { font-weight: 700; font-size: 16px; overflow-wrap: anywhere; }
+.meta, .endereco { font-size: 13px; color: var(--fraco); overflow-wrap: anywhere; }
+.contato, .site { display: grid; gap: 6px; justify-items: start; min-width: 0; }
+.tel { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.tel code { font: 500 14px var(--fonte-dado); font-variant-numeric: tabular-nums; user-select: all; }
+.botao {
+  display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 6px;
+  border: 1px solid var(--linha); background: var(--superficie); color: var(--tinta);
+  font: 13px var(--fonte-texto); cursor: pointer; text-decoration: none;
+}
+.botao:hover { border-color: var(--fraco); }
+.botao.whats { border-color: var(--noar); color: var(--noar); }
+.sem-tel { font-size: 13px; color: var(--fraco); }
+.pilula {
+  display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px;
+  font-size: 12.5px; font-weight: 700; background: var(--cor-fundo); color: var(--cor);
+}
+.link { font: 13px var(--fonte-dado); overflow-wrap: anywhere; color: var(--fraco); }
+.link a { color: var(--fraco); }
+.mais { justify-self: center; padding: 10px 18px; font-size: 15px; }
+.vazio { padding: 32px 4px; color: var(--fraco); }
+.carregando { padding: 32px 4px; color: var(--fraco); font: 14px var(--fonte-dado); }
+
+footer { font-size: 12.5px; color: var(--fraco); border-top: 1px solid var(--linha); padding-top: 14px; display: grid; gap: 6px; }
+footer code { font-family: var(--fonte-dado); }
+
+@media (max-width: 760px) {
+  .item { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .situacao, .botao { transition: border-color .15s, background-color .15s; }
+}
+</style>
+
+<main class="pagina">
+  <header class="topo">
+    <div class="olho">ProspectAI · Overture Maps</div>
+    <h1>Radar Norte Fluminense</h1>
+    <p class="lead" id="lead">Telefone e situação do site dos negócios do Norte e Noroeste Fluminense.
+      Ache quem não tem site, quem só tem Instagram e quem tem site fora do ar.</p>
+  </header>
+
+  <section class="situacoes" id="situacoes" aria-label="Situação do site"></section>
+
+  <section class="filtros" aria-label="Filtros">
+    <div class="campo busca">
+      <label for="q">Nome ou endereço</label>
+      <input type="search" id="q" placeholder="ex.: oficina, pelinca, sorriso" autocomplete="off">
+    </div>
+    <div class="campo">
+      <label for="cidade">Cidade</label>
+      <select id="cidade"><option value="">Todas as cidades</option></select>
+    </div>
+    <div class="campo">
+      <label for="ramo">Ramo</label>
+      <select id="ramo"><option value="">Todos os ramos</option></select>
+    </div>
+    <label class="marcar" for="cel"><input type="checkbox" id="cel"> Só com celular (WhatsApp)</label>
+  </section>
+
+  <p class="aviso"><b>“Sem site cadastrado”</b> quer dizer que a página da empresa no Facebook não informa
+    site, e não prova que ela não tenha um. <b>“Site fora do ar”</b> foi testado: o endereço não abre
+    ou devolve erro. Confira antes de abordar.</p>
+
+  <section aria-live="polite">
+    <div class="topo-lista">
+      <h2 id="contagem">Carregando…</h2>
+      <span>Ordem: site fora do ar, sem site, só Instagram, site gratuito, site no ar. Celular primeiro.</span>
+    </div>
+    <ol class="lista" id="lista"><li class="carregando">Carregando as empresas da região…</li></ol>
+  </section>
+  <button class="botao mais" id="mais" hidden>Mostrar mais</button>
+
+  <footer>
+    <div id="fonte">Dados de lugares: Overture Maps Foundation (overturemaps.org), licença CDLA-Permissive-2.0.</div>
+    <div>Para atualizar: <code>py -m prospectai.cli overture painel --saida painel/dados.json</code> e peça ao Claude para republicar.</div>
+  </footer>
+</main>
+
+<script>
+(() => {
+  const SIT = [
+    { k: "todas", rot: "Todas", cls: "s-todas" },
+    { k: "fora", rot: "Site fora do ar", cls: "s-fora" },
+    { k: "nenhum", rot: "Sem site cadastrado", cls: "s-nenhum" },
+    { k: "perfil", rot: "Só Instagram ou links", cls: "s-perfil" },
+    { k: "gratuito", rot: "Site gratuito ou automático", cls: "s-gratuito" },
+    { k: "noar", rot: "Site no ar", cls: "s-noar" },
+  ];
+  const ROTULO = { fora: "Site fora do ar", nenhum: "Sem site cadastrado", perfil: "Só Instagram ou links",
+                   gratuito: "Site gratuito", noar: "Site no ar", nr: "Site não respondeu" };
+  const ORDEM = { fora: 0, nenhum: 1, perfil: 2, gratuito: 3, noar: 4, nr: 5 };
+  const POR_PAGINA = 60;
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => n.toLocaleString("pt-BR");
+
+  let itens = [];
+  let estado = { sit: "todas", q: "", cidade: "", ramo: "", cel: false };
+  let mostrados = POR_PAGINA;
+
+  try { estado = { ...estado, ...JSON.parse(localStorage.getItem("radar-filtros") || "{}") }; } catch {}
+  const guardar = () => { try { localStorage.setItem("radar-filtros", JSON.stringify(estado)); } catch {} };
+
+  const semAcento = (t) => (t || "").normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+  const seguro = (u) => (typeof u === "string" && /^https?:\/\//i.test(u)) ? u : null;
+  const telFmt = (t) => {
+    const d = (t || "").replace(/\D/g, "").replace(/^55/, "");
+    if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+    if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+    return t;
+  };
+  function situacao(i) {
+    if (i.site && i.site_status === "fora_do_ar") return "fora";
+    if (i.site_tipo === "nenhum") return "nenhum";
+    if (i.site_tipo === "perfil") return "perfil";
+    if (i.site_tipo === "gratuito") return "gratuito";
+    return i.site_status === "no_ar" ? "noar" : "nr";
+  }
+  function el(tag, attrs = {}, ...filhos) {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v == null || v === false) continue;
+      if (k === "class") e.className = v; else if (k === "text") e.textContent = v; else e.setAttribute(k, v);
+    }
+    for (const f of filhos) if (f != null) e.append(f);
+    return e;
+  }
+
+  function filtrados(ignorarSit = false) {
+    const termos = semAcento(estado.q).split(/\s+/).filter(Boolean);
+    return itens.filter((i) =>
+      (ignorarSit || estado.sit === "todas" || i._sit === estado.sit) &&
+      (!estado.cidade || i.cidade === estado.cidade) &&
+      (!estado.ramo || i.grupo === estado.ramo) &&
+      (!estado.cel || i.celular) &&
+      termos.every((t) => i._busca.includes(t)));
+  }
+
+  function desenharSituacoes() {
+    const base = filtrados(true);
+    const n = { todas: base.length };
+    for (const i of base) n[i._sit] = (n[i._sit] || 0) + 1;
+    const caixa = $("situacoes");
+    caixa.replaceChildren(...SIT.map((s) => {
+      const qtd = n[s.k] || 0;
+      const b = el("button", { class: `situacao ${s.cls}`, type: "button", "aria-pressed": String(estado.sit === s.k) },
+        el("span", { class: "rot" }, el("span", { class: "ponto", "aria-hidden": "true" }), s.rot),
+        el("span", { class: "num", text: fmt(qtd) }),
+        el("span", { class: "pct", text: s.k === "todas" ? "negócios" : `${base.length ? Math.round(100 * qtd / base.length) : 0}% do recorte` }));
+      b.addEventListener("click", () => { estado.sit = s.k; mudou(); });
+      return b;
+    }));
+  }
+
+  function copiar(botao, texto) {
+    const ok = () => { botao.textContent = "Copiado"; setTimeout(() => (botao.textContent = "Copiar"), 1400); };
+    try {
+      navigator.clipboard.writeText(texto).then(ok, () => selecionar(botao));
+    } catch { selecionar(botao); }
+  }
+  function selecionar(botao) {
+    const code = botao.parentElement.querySelector("code");
+    const r = document.createRange(); r.selectNodeContents(code);
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    botao.textContent = "Selecionado";
+  }
+
+  function linha(i) {
+    const s = i._sit;
+    const contato = el("div", { class: "contato" });
+    if (i.telefone) {
+      const copiarBtn = el("button", { class: "botao", type: "button", text: "Copiar" });
+      copiarBtn.addEventListener("click", () => copiar(copiarBtn, telFmt(i.telefone)));
+      const tel = el("div", { class: "tel" }, el("code", { text: telFmt(i.telefone) }), copiarBtn);
+      if (i.celular) {
+        tel.append(el("a", { class: "botao whats", href: `https://wa.me/${i.telefone.replace(/\D/g, "")}`,
+                             target: "_blank", rel: "noopener", text: "WhatsApp" }));
+      }
+      contato.append(tel);
+      if (!i.celular) contato.append(el("span", { class: "sem-tel", text: "telefone fixo" }));
+    } else {
+      contato.append(el("span", { class: "sem-tel", text: "sem telefone" }));
+    }
+    const maps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${i.nome} ${i.cidade}`)}`;
+    contato.append(el("a", { class: "link", href: maps, target: "_blank", rel: "noopener", text: "ver no Google Maps" }));
+
+    const site = el("div", { class: "site" },
+      el("span", { class: `pilula ${({ fora: "s-fora", nenhum: "s-nenhum", perfil: "s-perfil", gratuito: "s-gratuito", noar: "s-noar", nr: "s-nr" })[s]}` },
+        el("span", { class: "ponto", "aria-hidden": "true" }), ROTULO[s]));
+    const url = seguro(i.site || i.perfil);
+    if (url) {
+      site.append(el("span", { class: "link" },
+        el("a", { href: url, target: "_blank", rel: "noopener nofollow", text: url.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, "") })));
+    }
+    const insta = seguro(i.instagram);
+    if (insta && insta !== url) {
+      site.append(el("span", { class: "link" }, el("a", { href: insta, target: "_blank", rel: "noopener nofollow", text: "Instagram" })));
+    }
+    return el("li", { class: "item" },
+      el("div", {},
+        el("div", { class: "nome", text: i.nome }),
+        el("div", { class: "meta", text: `${i.grupo} · ${i.cidade}` }),
+        i.endereco ? el("div", { class: "endereco", text: i.endereco }) : null),
+      contato, site);
+  }
+
+  function desenharLista() {
+    const lista = filtrados();
+    $("contagem").textContent = `${fmt(lista.length)} ${lista.length === 1 ? "empresa" : "empresas"}`;
+    const alvo = $("lista");
+    if (!lista.length) {
+      alvo.replaceChildren(el("li", { class: "vazio", text: "Nenhuma empresa com esses filtros. Tente outra cidade ou limpe a busca." }));
+    } else {
+      alvo.replaceChildren(...lista.slice(0, mostrados).map(linha));
+    }
+    const resto = lista.length - mostrados;
+    $("mais").hidden = resto <= 0;
+    $("mais").textContent = `Mostrar mais ${fmt(Math.min(POR_PAGINA, Math.max(resto, 0)))} de ${fmt(Math.max(resto, 0))}`;
+  }
+
+  function mudou() {
+    mostrados = POR_PAGINA;
+    guardar();
+    desenharSituacoes();
+    desenharLista();
+  }
+
+  let espera;
+  $("q").addEventListener("input", (e) => { clearTimeout(espera); espera = setTimeout(() => { estado.q = e.target.value; mudou(); }, 160); });
+  $("cidade").addEventListener("change", (e) => { estado.cidade = e.target.value; mudou(); });
+  $("ramo").addEventListener("change", (e) => { estado.ramo = e.target.value; mudou(); });
+  $("cel").addEventListener("change", (e) => { estado.cel = e.target.checked; mudou(); });
+  $("mais").addEventListener("click", () => { mostrados += POR_PAGINA; desenharLista(); });
+
+  function preencherSelect(id, valores) {
+    const sel = $(id);
+    for (const [v, n] of valores) sel.append(el("option", { value: v, text: `${v} (${fmt(n)})` }));
+  }
+
+  fetch("dados.json").then((r) => {
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r.json();
+  }).then((p) => {
+    itens = p.itens.map((i) => ({ ...i, _sit: situacao(i), _busca: semAcento(`${i.nome} ${i.endereco || ""} ${i.grupo}`) }));
+    itens.sort((a, b) => ORDEM[a._sit] - ORDEM[b._sit] || (b.celular - a.celular) || (b.confianca - a.confianca));
+    const conta = (campo) => [...itens.reduce((m, i) => m.set(i[campo], (m.get(i[campo]) || 0) + 1), new Map())]
+      .sort((a, b) => b[1] - a[1]);
+    preencherSelect("cidade", conta("cidade"));
+    preencherSelect("ramo", conta("grupo"));
+    const data = (iso) => new Date(iso.slice(0, 10) + "T12:00:00").toLocaleDateString("pt-BR");
+    $("lead").replaceChildren(
+      "Telefone e situação do site de ", el("b", { text: `${fmt(itens.length)} negócios` }),
+      ` de ${fmt(conta("cidade").length)} cidades do Norte e Noroeste Fluminense. `,
+      "Ache quem não tem site, quem só tem Instagram e quem tem site fora do ar.");
+    $("fonte").textContent = `${p.atribuicao}. Versão ${p.versao.slice(0, 10).split("-").reverse().join("/")}; sites testados em ${data(p.gerado_em)}. Igrejas, órgãos públicos, bancos e redes nacionais ficaram de fora.`;
+    $("q").value = estado.q;
+    $("cidade").value = estado.cidade;
+    $("ramo").value = estado.ramo;
+    $("cel").checked = !!estado.cel;
+    if ($("cidade").value !== estado.cidade) estado.cidade = "";
+    if ($("ramo").value !== estado.ramo) estado.ramo = "";
+    mudou();
+  }).catch((e) => {
+    $("contagem").textContent = "Não consegui carregar os dados";
+    $("lista").replaceChildren(el("li", { class: "vazio", text: `O arquivo de dados não abriu (${e.message}). Recarregue a página.` }));
+  });
+})();
+</script>
